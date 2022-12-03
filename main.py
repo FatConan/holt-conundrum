@@ -13,7 +13,7 @@ class Islander:
         self.name = name
         self.weight = weight
     def __repr__(self):
-        return "Islander %s" % self.name
+        return self.name
 
 # And a seesaw
 # First its enumerated possible results
@@ -141,18 +141,23 @@ class Island:
             result = self.seesaw.weigh(left, right)
 
             if result == SeeSawResult.BALANCED:
-                #On of the disposed islanders is at fault (4,7,8)
+                # One of the disposed islanders is at fault (4,7,8), use the same trick as last time to determine which of the three
+                # is the culprit
                 left = set([self.islanders[9], self.islanders[7]])
                 right = set([self.islanders[11], self.islanders[8]])
                 result = self.seesaw.weigh(left, right)
                 if result == SeeSawResult.BALANCED:
+                    # If they balance the one we didn't weigh is the odd one out
                     return self.islanders[4]
                 elif result != last_result:
+                    # If it tilts in the same direction it's the one that stayed in place
                     return self.islanders[7]
                 else:
+                    # If it tilts in the opposite direction it's the one we swapped over
                     return self.islanders[8]
             elif result == last_result:
-                #It's one of the elements that didn't move (1, 5, 6)
+                # It's one of the elements that didn't move (1, 5, 6)
+                # Use the same trick again
                 left = set([self.islanders[9], self.islanders[10]])
                 right = set([self.islanders[1],  self.islanders[5]])
                 result = self.seesaw.weigh(left, right)
@@ -163,7 +168,8 @@ class Island:
                 else:
                     return self.islanders[5]
             else:
-                #Its one of the transient ones (2 or 3)
+                # Its one of the transient ones (2 or 3)
+                # Similar but with 2 we won't need to worry about the direction of the seesaw
                 left = set([self.islanders[9]])
                 right = set([self.islanders[2]])
                 result = self.seesaw.weigh(left, right)
@@ -176,16 +182,25 @@ class Island:
 if __name__ == "__main__":
     success = 0
     iterations = 1000
+    print("We're going to try this %d times, with a randomised islander who's randomly heavier or lighter than the others to show it working:\n" % iterations)
+    print("The comments in the code of main.py should explain how the method works.\n\n")
     for i in range(0, iterations):
         island = Island()
+        #Use the seesaw method to determine the odd one out
         odd_ball = island.find_oddball()
+        # Then just use a programmatic lookup to find the correct islander, so should the seesaw method fail,
+        # we can show who it should have been.
         correct = island.cheat()
         if odd_ball is not None:
             if odd_ball.weight != 2:
                 success += 1
                 print("Found the odd one out: %s" % odd_ball)
+                weight_str = "ligher"
+                if odd_ball.weight > 2:
+                    weight_str = "heavier"
+                print("Yup, %s was %s than the others" % (odd_ball, weight_str))
             else:
-                print("Didn't fin the odd one out. Should have been: %s" % correct)
+                print("Didn't find the odd one out. Should have been: %s" % correct)
         else:
             print("Undecided after %d uses of the seesaw" % island.seesaw.count)
         print("\n-------------------------------------------------------------\n")
